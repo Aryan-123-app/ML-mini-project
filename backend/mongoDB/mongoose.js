@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const dotenv   = require("dotenv");
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://aryanpatade8_db_user:5vlllem2iC9rJMkM@cluster0.ylighsl.mongodb.net/";
 
 let connected = false;
 

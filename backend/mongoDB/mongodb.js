@@ -3,7 +3,7 @@ dotenv.config();
 
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
-const uri = process.env.MONGO_URI;
+const uri = process.env.MONGO_URI || "mongodb+srv://aryanpatade8_db_user:5vlllem2iC9rJMkM@cluster0.ylighsl.mongodb.net/";
 
 const client = new MongoClient(uri, {
     serverApi: {
