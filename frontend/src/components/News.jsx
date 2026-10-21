@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../apiConfig";
 import "./CSS/News.css";
 
 export default function News({ externalQuery }) {
@@ -12,7 +13,7 @@ export default function News({ externalQuery }) {
 
     const fetchNews = (q) => {
         setLoading(true);
-        axios.get(`http://localhost:3000/news?q=${encodeURIComponent(q)}`)
+        axios.get(`${API_BASE_URL}/news?q=${encodeURIComponent(q)}`)
             .then(r => setNews(r.data))
             .catch(() => {})
             .finally(() => setLoading(false));

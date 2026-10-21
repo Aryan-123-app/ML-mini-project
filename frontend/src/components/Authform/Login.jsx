@@ -3,9 +3,10 @@ import { createPortal } from "react-dom";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { LogOut } from "lucide-react";
+import { API_BASE_URL } from "../../apiConfig";
 import "./login.css";
 
-const API = "http://localhost:3000/auth";
+const API = `${API_BASE_URL}/auth`;
 
 export default function AuthModal() {
     const { user, login, logout, loginModalOpen, closeLogin, openLogin } = useAuth();

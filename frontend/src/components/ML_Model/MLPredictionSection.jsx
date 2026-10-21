@@ -7,6 +7,7 @@ import {
 } from "chart.js";
 import "chartjs-adapter-date-fns";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE_URL } from "../../apiConfig";
 import "./MLPrediction.css";
 
 ChartJS.register(TimeScale, LinearScale, LineElement, PointElement, Tooltip, Legend, Filler);
@@ -57,7 +58,7 @@ export default function MLPredictionSection() {
 
         let fetchedData = null;
         try {
-            const res = await axios.get(`http://localhost:3000/predict/${activeModel.key}`);
+            const res = await axios.get(`${API_BASE_URL}/predict/${activeModel.key}`);
             fetchedData = res.data;
         } catch (err) {
             setStage(-1);

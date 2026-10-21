@@ -12,6 +12,7 @@ import {
     Legend,
 } from "chart.js";
 import "chartjs-adapter-date-fns";
+import { API_BASE_URL } from "../../apiConfig";
 import "./Nifty.css";
 
 ChartJS.register(TimeScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
@@ -24,7 +25,7 @@ export default function PredictionChart({ modelKey, title, onClose }) {
     useEffect(() => {
         setLoading(true);
         setError(null);
-        axios.get(`http://localhost:3000/predict/${modelKey}`)
+        axios.get(`${API_BASE_URL}/predict/${modelKey}`)
             .then(res => setData(res.data))
             .catch(err => {
                 console.error(err);

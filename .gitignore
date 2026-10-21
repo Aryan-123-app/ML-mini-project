@@ -15,9 +15,9 @@ __pycache__/
 *.pyc
 *.pyo
 
-# ML model files (large binaries)
-ML_model/**/*.h5
-ML_model/**/*.pkl
+# ML model files (allow pre-trained ~1MB weights for fast cloud deploy)
+# ML_model/**/*.h5
+# ML_model/**/*.pkl
 
 # Build output
 frontend/dist/

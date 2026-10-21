@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import "./CSS/Vlogs.css";
 import { X } from 'lucide-react';
-import axios from "axios"
+import axios from "axios";
+import { API_BASE_URL } from "../apiConfig";
 export default function Vlogs({ open, setOpen }) {
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,7 +14,7 @@ export default function Vlogs({ open, setOpen }) {
     const fetchVideos = async (searchQuery) => {
         setLoading(true);
         try {
-            const res = await axios.post("http://localhost:3000/validate", {
+            const res = await axios.post(`${API_BASE_URL}/validate`, {
                 query: searchQuery
             });
 

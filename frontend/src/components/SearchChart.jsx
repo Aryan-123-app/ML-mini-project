@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import SearchBar from "./SearchBar";
 import MultiSymbolCharts from "./Charts";
+import { API_BASE_URL } from "../apiConfig";
 
 export default function SeaechChart(){
     
@@ -28,7 +29,7 @@ export default function SeaechChart(){
 
             try {
                 const res = await axios.get(
-                    "http://localhost:3000/search?symbol=" + symbols.join(","),
+                    `${API_BASE_URL}/search?symbol=` + symbols.join(","),
                     { signal: controller.signal }
                 );
 

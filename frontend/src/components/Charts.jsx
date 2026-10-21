@@ -17,6 +17,7 @@ import "chartjs-adapter-date-fns";
 import "./CSS/ChartGrid.css";
 import { useAuth } from "../context/AuthContext";
 import StockDataTable from "./StockDataTable";
+import { API_BASE_URL } from "../apiConfig";
 
 ChartJS.register(
     LinearScale, TimeScale, Tooltip, Title,
@@ -67,7 +68,7 @@ export default function MultiSymbolCharts({ searchedSymbol }) {
     useEffect(() => {
         if (symbols.length === 0) return;
         setLoading(true);
-        axios.get("http://localhost:3000/stock?symbol=" + symbols.join(","))
+        axios.get(`${API_BASE_URL}/stock?symbol=` + symbols.join(","))
             .then(res => {
                 const dataObj = {};
                 symbols.forEach(sym => {

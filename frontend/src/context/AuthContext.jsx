@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../apiConfig";
 
 const AuthContext = createContext(null);
 
@@ -33,7 +34,7 @@ export function AuthProvider({ children }) {
 
     const fetchWatchlist = useCallback(async (tok) => {
         try {
-            const res = await axios.get("http://localhost:3000/auth/watchlist", {
+            const res = await axios.get(`${API_BASE_URL}/auth/watchlist`, {
                 headers: { Authorization: `Bearer ${tok || token()}` }
             });
             setWatchlist(res.data.watchlist || []);
@@ -42,7 +43,7 @@ export function AuthProvider({ children }) {
 
     const addToWatchlist = async (symbol) => {
         try {
-            const res = await axios.post("http://localhost:3000/auth/watchlist/add",
+            const res = await axios.post(`${API_BASE_URL}/auth/watchlist/add`,
                 { symbol },
                 { headers: { Authorization: `Bearer ${token()}` } }
             );
@@ -52,7 +53,7 @@ export function AuthProvider({ children }) {
 
     const removeFromWatchlist = async (symbol) => {
         try {
-            const res = await axios.post("http://localhost:3000/auth/watchlist/remove",
+            const res = await axios.post(`${API_BASE_URL}/auth/watchlist/remove`,
                 { symbol },
                 { headers: { Authorization: `Bearer ${token()}` } }
             );
