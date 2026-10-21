@@ -1,7 +1,7 @@
 const express = require("express");
 const route = express.Router();
 
-const rawUrl = process.env.ML_SERVER_URL || "http://localhost:5000";
+const rawUrl = process.env.ML_SERVER_URL || "https://trader-street-ml.onrender.com";
 const ML_SERVER_URL = rawUrl.trim().replace(/\/+$/, "");
 
 // Root info route
