@@ -8,6 +8,7 @@ import Chart from "./Charts";
 import MLPredictionSection from "./ML_Model/MLPredictionSection";
 import News from "./News";
 import Footer from "./Footer";
+import HeroLanding from "./HeroLanding";
 import { Menu, X, BrainCircuit, ArrowLeft, Sun, Moon } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import DrawerMenu from "./DrawerMenu";
@@ -116,8 +117,24 @@ export default function Home() {
         <SearchBar onSearch={handleSearch} />
       </div>
 
-      {user && view === "ml"   && <MLPredictionSection />}
-      {view === "charts"       && <><News externalQuery={newsQuery} /><Chart searchedSymbol={searchedSymbol} /></>}
+      {!user && !searchedSymbol && (
+        <HeroLanding
+          onOpenLogin={openLogin}
+          onScrollToCharts={() => {
+            const el = document.getElementById("market-charts-section");
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
+      )}
+
+      {user && view === "ml" && <MLPredictionSection />}
+
+      {(!user || view === "charts") && (
+        <div id="market-charts-section">
+          <News externalQuery={newsQuery} />
+          <Chart searchedSymbol={searchedSymbol} />
+        </div>
+      )}
 
       <Footer onNewsSearch={(q) => { setNewsQuery(q); setView("charts"); }} />
     </>
