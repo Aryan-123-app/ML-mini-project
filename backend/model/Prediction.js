@@ -3,6 +3,20 @@ const route = express.Router();
 
 const ML_SERVER_URL = process.env.ML_SERVER_URL || "http://localhost:5000";
 
+// Root info route
+route.get("/", (req, res) => {
+    res.json({
+        message: "Trader's Street Prediction API is active",
+        available_endpoints: [
+            "/predict/nifty50",
+            "/predict/niftybank",
+            "/predict/niftyit",
+            "/predict/niftyauto",
+            "/predict/niftynext"
+        ]
+    });
+});
+
 // Proxy to Python Flask prediction server on port 5000
 route.get("/:modelKey", async (req, res) => {
     const { modelKey } = req.params;
