@@ -1,14 +1,31 @@
 const express = require("express");
 const route = express.Router();
 
-const rawUrl = process.env.ML_SERVER_URL || "https://trader-street-ml.onrender.com";
-const ML_SERVER_URL = rawUrl.trim().replace(/\/+$/, "");
+// Dynamic resolver: prefers local port 5000 when running locally, falls back to cloud ML service
+async function resolveMLServerUrl() {
+    const envUrl = process.env.ML_SERVER_URL;
+    if (envUrl) {
+        const clean = envUrl.trim().replace(/\/+$/, "");
+        if (clean.includes("localhost") || clean.includes("127.0.0.1")) {
+            return clean;
+        }
+    }
+    try {
+        const localCheck = await fetch("http://localhost:5000/health", { signal: AbortSignal.timeout(400) });
+        if (localCheck.ok) {
+            return "http://localhost:5000";
+        }
+    } catch (_) {}
+
+    return (envUrl ? envUrl.trim().replace(/\/+$/, "") : "https://trader-street-ml.onrender.com");
+}
 
 // Root info route
-route.get("/", (req, res) => {
+route.get("/", async (req, res) => {
+    const currentUrl = await resolveMLServerUrl();
     res.json({
         message: "Trader's Street Prediction API is active",
-        configured_ml_url: ML_SERVER_URL,
+        configured_ml_url: currentUrl,
         available_endpoints: [
             "/predict/nifty50",
             "/predict/niftybank",
@@ -19,20 +36,28 @@ route.get("/", (req, res) => {
     });
 });
 
-// Proxy to Python Flask prediction server on port 5000
+// Proxy to Python Flask prediction server
 route.get("/:modelKey", async (req, res) => {
     const { modelKey } = req.params;
-    const targetUrl = `${ML_SERVER_URL}/predict/${modelKey}`;
+    const baseUrl = await resolveMLServerUrl();
+    const targetUrl = `${baseUrl}/predict/${modelKey}`;
     try {
         const response = await fetch(targetUrl);
         if (!response.ok) {
-            const err = await response.json().catch(() => ({}));
-            return res.status(response.status).json(err);
+            let errorMsg = "Prediction server returned an error";
+            try {
+                const errData = await response.json();
+                errorMsg = errData.error || errData.message || JSON.stringify(errData);
+            } catch (_) {
+                const text = await response.text().catch(() => "");
+                errorMsg = `ML Server error (${response.status}): ${text.slice(0, 100)}`;
+            }
+            return res.status(response.status).json({ error: errorMsg });
         }
         const data = await response.json();
         res.json(data);
     } catch (error) {
-        console.error(`Prediction proxy error contacting ${targetUrl}:`, error);
+        console.error(`Prediction proxy error contacting ${targetUrl}:`, error.message);
         res.status(500).json({
             error: "Prediction server unavailable",
             target_url: targetUrl,
@@ -44,7 +69,8 @@ route.get("/:modelKey", async (req, res) => {
 // POST — custom 60-day data from user
 route.post("/:modelKey", async (req, res) => {
     const { modelKey } = req.params;
-    const targetUrl = `${ML_SERVER_URL}/predict/${modelKey}`;
+    const baseUrl = await resolveMLServerUrl();
+    const targetUrl = `${baseUrl}/predict/${modelKey}`;
     try {
         const response = await fetch(targetUrl, {
             method: "POST",
@@ -52,13 +78,20 @@ route.post("/:modelKey", async (req, res) => {
             body: JSON.stringify(req.body),
         });
         if (!response.ok) {
-            const err = await response.json().catch(() => ({}));
-            return res.status(response.status).json(err);
+            let errorMsg = "Prediction server returned an error";
+            try {
+                const errData = await response.json();
+                errorMsg = errData.error || errData.message || JSON.stringify(errData);
+            } catch (_) {
+                const text = await response.text().catch(() => "");
+                errorMsg = `ML Server error (${response.status}): ${text.slice(0, 100)}`;
+            }
+            return res.status(response.status).json({ error: errorMsg });
         }
         const data = await response.json();
         res.json(data);
     } catch (error) {
-        console.error(`Prediction POST error contacting ${targetUrl}:`, error);
+        console.error(`Prediction POST error contacting ${targetUrl}:`, error.message);
         res.status(500).json({
             error: "Prediction server unavailable",
             target_url: targetUrl,
