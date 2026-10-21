@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 
 # Load .env file
+load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 load_dotenv()
 
 # Get Mongo URI from .env

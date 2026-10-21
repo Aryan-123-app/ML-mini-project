@@ -120,7 +120,7 @@ loaded = {}
 for key, meta in MODEL_META.items():
     h5_path = os.path.join(BASE, meta["dir"], meta["h5"])
     patch_h5(h5_path)
-    model = load_model(h5_path)
+    model = load_model(h5_path, compile=False)
 
     # Try joblib first; if numpy._core error, rebuild scaler from data_min/data_max
     feat_scaler_path   = os.path.join(BASE, meta["dir"], "feature_scaler.pkl")
@@ -276,6 +276,21 @@ def predict_custom_route(model_key):
         return jsonify({"prediction": float(y_pred), "history": history})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/")
+def index():
+    return jsonify({
+        "message": "Trader's Street ML Prediction Server is running",
+        "status": "ok",
+        "available_endpoints": [
+            "/health",
+            "/predict/nifty50",
+            "/predict/niftybank",
+            "/predict/niftyit",
+            "/predict/niftyauto",
+            "/predict/niftynext"
+        ]
+    })
 
 @app.route("/health")
 def health():

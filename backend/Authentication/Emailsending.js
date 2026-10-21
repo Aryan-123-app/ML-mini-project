@@ -3,7 +3,6 @@ dotenv.config({ path: "../../.env" });
 const nodemailer=require("nodemailer");
 console.log("Trader's Street Mail Service Running");
 console.log("Using Gmail SMTP server with user:", process.env.EMAIL_USER);
-console.log("Passsword:", process.env.EMAIL_PASSWORD);
  const sendOTP = async (email) => {
     const OTP = Math.floor(100000 + Math.random() * 900000);
     const transport = nodemailer.createTransport({

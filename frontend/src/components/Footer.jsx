@@ -62,8 +62,8 @@ export default function Footer({ onNewsSearch }) {
                 <div className="footer-col">
                     <h4>Contact</h4>
                     <ul>
-                        <li><Mail size={13} /> yashmangla118@gmail.com</li>
-                        <li><Github size={13} /> github.com/trader-street</li>
+                        <li><Mail size={13} /> aryanpatade8@gmail.com</li>
+                        <li><Github size={13} /> github.com/Aryan-123-app/ML-mini-project</li>
                     </ul>
                     <div className="footer-disclaimer">
                         <strong>Disclaimer:</strong> Predictions are for educational purposes only. Not financial advice.
@@ -80,7 +80,7 @@ export default function Footer({ onNewsSearch }) {
                     <a href="#">Terms of Use</a>
                     <a href="#">Disclaimer</a>
                 </div>
-                <span className="footer-made">Made with ❤️ by Yash Mangla</span>
+                <span className="footer-made">Made with ❤️ by Aryan Patade</span>
             </div>
         </footer>
     );

@@ -1,14 +1,16 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import yfinance as yf
 from db_connection import get_modeldata
 from datetime import datetime, timedelta
 
-collection=get_modeldata()
+collection = get_modeldata()
 
-companies=["^NSEBANK","^CNXIT","^CNXAUTO","^NSEI","^NSMIDCP"]
+companies = ["^NSEBANK", "^CNXIT", "^CNXAUTO", "^NSEI", "^NSMIDCP"]
 end_date = datetime.today()
-start_date = end_date - timedelta(days=90)
-
-import yfinance as yf
+start_date = end_date - timedelta(days=200)
 
 for ticker in companies:
     try:
@@ -31,6 +33,7 @@ for ticker in companies:
         for rec in records:
             rec["Ticker"] = ticker
 
+        collection.delete_many({"Ticker": ticker})
         collection.insert_many(records)
         print(f"{ticker} - {len(records)} records saved.")
 
