@@ -1,11 +1,18 @@
 const express = require("express");
 const route = express.Router();
 
+function normalizeMLServerUrl(url) {
+    const clean = url.trim().replace(/\/+$/, "");
+    if (/^https?:\/\//i.test(clean)) return clean;
+    const protocol = clean.includes("localhost") || clean.includes("127.0.0.1") ? "http" : "https";
+    return `${protocol}://${clean}`;
+}
+
 // Dynamic resolver: prefers local port 5000 when running locally, falls back to cloud ML service
 async function resolveMLServerUrl() {
-    const envUrl = process.env.ML_SERVER_URL;
+    const envUrl = process.env.ML_SERVER_URL?.trim();
     if (envUrl) {
-        const clean = envUrl.trim().replace(/\/+$/, "");
+        const clean = normalizeMLServerUrl(envUrl);
         if (clean.includes("localhost") || clean.includes("127.0.0.1")) {
             return clean;
         }
@@ -17,7 +24,7 @@ async function resolveMLServerUrl() {
         }
     } catch (_) {}
 
-    return (envUrl ? envUrl.trim().replace(/\/+$/, "") : "https://trader-street-ml.onrender.com");
+    return envUrl ? normalizeMLServerUrl(envUrl) : "https://trader-street-ml.onrender.com";
 }
 
 // Root info route

@@ -1,5 +1,7 @@
+const path = require('path');
 const dotenv = require('dotenv');
-dotenv.config({ path: '../.env' }); // Load from root
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const express = require('express');
 const app = express();
@@ -15,6 +17,14 @@ const NewsRoute        = require("./model/News");
 
 app.use(cors());
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.json({ message: "Trader's Street API is running", status: "ok" });
+});
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
 app.use("/auth",    AuthRoute);
 app.use("/news",    NewsRoute);

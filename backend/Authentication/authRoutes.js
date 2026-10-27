@@ -27,16 +27,50 @@ router.post("/register", async (req, res, next) => {
         if (!name || !email || !password)
             return res.status(400).json({ error: "All fields are required" });
 
-        if (await User.findOne({ email }))
+        const existing = await User.findOne({ email });
+        if (existing && existing.verified)
             return res.status(409).json({ error: "Email already registered" });
 
         const hashed = await bcrypt.hash(password, 10);
-        await User.create({ name, email, password: hashed });
+        if (existing && !existing.verified) {
+            existing.name = name;
+            existing.password = hashed;
+            await existing.save();
+        } else {
+            await User.create({ name, email, password: hashed });
+        }
 
-        const { OTP } = await sendOTP(email);
-        otpStore[email] = { otp: OTP, expiresAt: Date.now() + 2 * 60 * 1000 };
+        const mailResult = await sendOTP(email);
+        if (!mailResult.success) {
+            return res.status(500).json({ error: "Failed to send verification email. Please try again later." });
+        }
+        otpStore[email] = { otp: mailResult.OTP, expiresAt: Date.now() + 2 * 60 * 1000 };
 
         res.json({ message: "Registered. OTP sent to your email." });
+    } catch (err) { next(err); }
+});
+
+// ── POST /auth/resend-otp ─────────────────────────────────────────────────────
+router.post("/resend-otp", async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        if (!email)
+            return res.status(400).json({ error: "Email is required" });
+
+        const user = await User.findOne({ email });
+        if (!user)
+            return res.status(404).json({ error: "No account found with this email" });
+
+        if (user.verified)
+            return res.status(400).json({ error: "Email is already verified. Please login." });
+
+        const mailResult = await sendOTP(email);
+        if (!mailResult.success) {
+            return res.status(500).json({ error: "Failed to send verification email. Please try again." });
+        }
+
+        otpStore[email] = { otp: mailResult.OTP, expiresAt: Date.now() + 2 * 60 * 1000 };
+        res.json({ message: "A fresh OTP has been sent to your email." });
     } catch (err) { next(err); }
 });
 
@@ -47,10 +81,10 @@ router.post("/verify-otp", async (req, res, next) => {
         const record = otpStore[email];
 
         if (!record)
-            return res.status(400).json({ error: "No OTP found for this email" });
+            return res.status(400).json({ error: "No OTP found for this email. Please request a new one." });
         if (Date.now() > record.expiresAt) {
             delete otpStore[email];
-            return res.status(400).json({ error: "OTP expired. Please register again." });
+            return res.status(400).json({ error: "OTP expired. Please request a new OTP." });
         }
         if (String(record.otp) !== String(otp))
             return res.status(400).json({ error: "Invalid OTP" });
@@ -74,8 +108,18 @@ router.post("/login", async (req, res, next) => {
         if (!user || !(await bcrypt.compare(password, user.password)))
             return res.status(401).json({ error: "Invalid email or password" });
 
-        if (!user.verified)
-            return res.status(403).json({ error: "Email not verified. Check your inbox for the OTP." });
+        if (!user.verified) {
+            // Automatically send a fresh OTP so the user can verify
+            const mailResult = await sendOTP(email);
+            if (mailResult.success) {
+                otpStore[email] = { otp: mailResult.OTP, expiresAt: Date.now() + 2 * 60 * 1000 };
+            }
+            return res.status(403).json({
+                error: "Email not verified. A new OTP has been sent to your inbox.",
+                unverified: true,
+                email: user.email
+            });
+        }
 
         res.json({ token: sign(user), user: { name: user.name, email: user.email } });
     } catch (err) { next(err); }
@@ -118,19 +162,7 @@ router.post("/reset-password", async (req, res, next) => {
     } catch (err) { next(err); }
 });
 
-// ── GET /auth/me (protected) ──────────────────────────────────────────────────
-router.get("/me", (req, res) => {
-    const auth = req.headers.authorization;
-    if (!auth) return res.status(401).json({ error: "No token provided" });
-    try {
-        const decoded = jwt.verify(auth.split(" ")[1], process.env.JWT_SECRET);
-        res.json({ user: { name: decoded.name, email: decoded.email } });
-    } catch {
-        res.status(401).json({ error: "Invalid or expired token" });
-    }
-});
 
-module.exports = router;
 
 // ── Auth middleware helper ────────────────────────────────────────────────────
 function authMiddleware(req, res, next) {

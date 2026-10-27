@@ -1,6 +1,8 @@
+const path = require("path");
 const dotenv = require("dotenv");
-dotenv.config({ path: "../../.env" });
-const nodemailer=require("nodemailer");
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+const nodemailer = require("nodemailer");
 console.log("Trader's Street Mail Service Running");
 console.log("Using Gmail SMTP server with user:", process.env.EMAIL_USER);
  const sendOTP = async (email) => {
@@ -68,7 +70,7 @@ console.log("Using Gmail SMTP server with user:", process.env.EMAIL_USER);
         return { success: true, OTP };
     } catch (err) {
         console.error("Error in sending mail:", err);
-        return { success: false, OTP };
+        return { success: false, OTP: null, error: err.message };
     }
 };
 

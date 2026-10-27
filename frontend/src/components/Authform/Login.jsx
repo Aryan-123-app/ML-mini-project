@@ -42,7 +42,24 @@ export default function AuthModal() {
             login(res.data.user, res.data.token);
             closeModal();
         } catch (err) {
-            setError(err.response?.data?.error || "Login failed");
+            if (err.response?.data?.unverified) {
+                setPendingEmail(err.response.data.email || email);
+                setSuccess(err.response.data.error || "Please verify your email with the OTP sent.");
+                setView("verify-otp");
+            } else {
+                setError(err.response?.data?.error || "Login failed");
+            }
+        } finally { setLoading(false); }
+    };
+
+    // ── Resend OTP ──
+    const handleResendOtp = async () => {
+        reset(); setLoading(true);
+        try {
+            const res = await axios.post(`${API}/resend-otp`, { email: pendingEmail });
+            setSuccess(res.data.message || "New OTP sent to your email.");
+        } catch (err) {
+            setError(err.response?.data?.error || "Failed to resend OTP");
         } finally { setLoading(false); }
     };
 
@@ -169,7 +186,7 @@ export default function AuthModal() {
                     </>
                 )}
 
-                {/* VERIFY OTP (after register) */}
+                {/* VERIFY OTP (after register or unverified login) */}
                 {view === "verify-otp" && (
                     <>
                         <h2>Verify Email</h2>
@@ -181,6 +198,13 @@ export default function AuthModal() {
                             </div>
                             <button className="submit-btn" disabled={loading}>{loading ? "Verifying..." : "Verify"}</button>
                         </form>
+                        <p className="switch-text">
+                            Didn't get the code?{" "}
+                            <span onClick={handleResendOtp}>Resend OTP</span>
+                        </p>
+                        <p className="switch-text">
+                            <span onClick={() => { reset(); setView("login"); }}>Back to Login</span>
+                        </p>
                     </>
                 )}
 

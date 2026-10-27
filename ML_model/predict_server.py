@@ -14,7 +14,9 @@ warnings.filterwarnings("ignore")
 
 # ── env & DB ──────────────────────────────────────────────────────────────────
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
-MONGO_URI = os.getenv("MONGO_URI") or "mongodb+srv://aryanpatade8_db_user:5vlllem2iC9rJMkM@cluster0.ylighsl.mongodb.net/"
+MONGO_URI = os.getenv("MONGO_URI")
+if not MONGO_URI:
+    raise RuntimeError("MONGO_URI must be set in the environment")
 client     = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db         = client["Trader's_street"]
 collection = db["Model60data"]

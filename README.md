@@ -1,3 +1,5 @@
+<!-- @format -->
+
 # 📈 Trader's Street
 
 **AI-powered stock market analytics & LSTM-based index prediction platform for Indian markets.**
@@ -30,6 +32,7 @@ Final year B.Tech (Computer Science) major project by **Aryan Patade** — a ful
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 18** + **Vite**
 - **Chart.js** & **react-chartjs-2** (with `chartjs-adapter-date-fns` and `chartjs-chart-financial`)
 - **React Router 7**
@@ -37,12 +40,14 @@ Final year B.Tech (Computer Science) major project by **Aryan Patade** — a ful
 - **Axios**
 
 ### Backend
+
 - **Node.js** & **Express 5**
 - **MongoDB** & **Mongoose**
 - **JWT** (`jsonwebtoken`) & **bcryptjs**
 - **Nodemailer** (OTP verification & email services)
 
 ### Machine Learning & Data Pipeline
+
 - **Python 3.11+ / 3.13**
 - **TensorFlow** / **Keras 3** (LSTM Recurrent Neural Networks)
 - **scikit-learn** (`MinMaxScaler` for multi-feature scaling)
@@ -89,6 +94,7 @@ Trader-street/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - **Node.js** (v18+) & **npm**
 - **Python** (v3.10+) with `pip`
 - **MongoDB** instance (local or MongoDB Atlas connection string)
@@ -117,6 +123,7 @@ cd backend
 npm install
 node server.js
 ```
+
 The backend server will start listening for API requests.
 
 ---
@@ -124,11 +131,13 @@ The backend server will start listening for API requests.
 ### 3. Frontend Setup
 
 In a new terminal:
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
 Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 
 ---
@@ -138,17 +147,20 @@ Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 In a new terminal at the project root:
 
 1. **Activate the Python virtual environment:**
+
    ```powershell
    .\activate.ps1
    # Or: venv\Scripts\activate
    ```
 
 2. **Install required Python dependencies:**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Fetch recent index data & train the LSTM models:**
+
    ```bash
    # Ingest latest 60+ trading days into MongoDB:
    python data_Pipeline/Model_stock_data/modeldatainsert.py
@@ -167,12 +179,20 @@ In a new terminal at the project root:
 
 ## 📡 Prediction API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/` | API status and available endpoints summary |
-| `GET` | `/health` | Health check and list of loaded ML models |
-| `GET` | `/predict/<model_key>` | Returns predicted next close price and 60-day history for the given index (`nifty50`, `niftybank`, `niftyit`, `niftyauto`, `niftynext`) |
-| `POST` | `/predict/<model_key>` | Accepts custom 60-row payload `{ "rows": [...] }` and returns real-time model prediction |
+| Method | Endpoint               | Description                                                                                                                             |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/`                    | API status and available endpoints summary                                                                                              |
+| `GET`  | `/health`              | Health check and list of loaded ML models                                                                                               |
+| `GET`  | `/predict/<model_key>` | Returns predicted next close price and 60-day history for the given index (`nifty50`, `niftybank`, `niftyit`, `niftyauto`, `niftynext`) |
+| `POST` | `/predict/<model_key>` | Accepts custom 60-row payload `{ "rows": [...] }` and returns real-time model prediction                                                |
+
+## ☁️ Deployment (Vercel + Render)
+
+1. Push this repository to GitHub and create a Render Blueprint from it. Render reads `render.yaml` to create the Node API and Python ML services. Enter the same MongoDB Atlas `MONGO_URI` for both services and provide `EMAIL_USER` and `EMAIL_PASSWORD` for the API's OTP email feature. Render generates `JWT_SECRET` and connects the API to the ML service.
+2. Deploy `frontend/` as a Vercel project. Set `VITE_API_URL` to the public URL of the Render API service, for example `https://trader-street-api.onrender.com`, then redeploy the frontend.
+3. Use the Render API URL to check `/` and `/health`; use the frontend's Vercel URL to open the app.
+
+The ML service loads TensorFlow and all five models at startup, so it may exceed the memory available on a free instance. Upgrade that Render service if its deployment logs show an out-of-memory failure. Do not put credentials in the repository; rotate any credentials previously committed in source code.
 
 ---
 
