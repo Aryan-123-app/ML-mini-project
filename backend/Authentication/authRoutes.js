@@ -7,8 +7,14 @@ const sendOTP          = require("./Emailsending");
 
 const router = express.Router();
 
-// Connect mongoose when this module loads
-connectMongoose();
+router.use(async (req, res, next) => {
+    try {
+        await connectMongoose();
+        next();
+    } catch {
+        res.status(503).json({ error: "Database unavailable. Check the MONGO_URI service environment variable." });
+    }
+});
 
 // In-memory OTP store  { email: { otp, expiresAt } }
 const otpStore = {};

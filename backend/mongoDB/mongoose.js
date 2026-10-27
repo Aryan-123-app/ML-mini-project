@@ -7,20 +7,28 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 const MONGO_URI = process.env.MONGO_URI;
 
 let connected = false;
+let connectionPromise;
 
-async function connectMongoose() {
+function connectMongoose() {
     if (connected) return;
-    try {
-        if (!MONGO_URI) {
-            throw new Error("MONGO_URI is not configured. Set it in backend/.env or the project root .env.");
-        }
-        await mongoose.connect(MONGO_URI);
-        connected = true;
-        console.log("✅ Mongoose connected (Users)");
-    } catch (err) {
-        console.error("❌ Mongoose connection error:", err.message);
-        throw err;
+    if (!MONGO_URI) {
+        return Promise.reject(new Error("MONGO_URI is not configured. Set it in backend/.env or the project root .env."));
     }
+
+    if (!connectionPromise) {
+        connectionPromise = mongoose.connect(MONGO_URI)
+            .then(() => {
+                connected = true;
+                console.log("✅ Mongoose connected (Users)");
+            })
+            .catch((err) => {
+                connectionPromise = undefined;
+                console.error("❌ Mongoose connection error:", err.message);
+                throw err;
+            });
+    }
+
+    return connectionPromise;
 }
 
 module.exports = connectMongoose;
